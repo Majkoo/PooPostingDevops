@@ -54,6 +54,11 @@
       - npm
       - git
     state: present
+- name: Instalacja angular npm
+  community.general.npm:
+    name: "@angular/cli"
+    global: true
+    state: present
 - name: Instalacja PHP dla PHPMyAdmin
   block:
     - name: Instalacja Gnupg
@@ -157,6 +162,34 @@
   with_items:
     - "pooposting-dev"
     - "pooposting-prod"
+- name: Stworzenie katalogów w /home/debian
+  ansible.builtin.file:
+    path: "/home/debian/{{ item }}"
+    state: directory
+    mode: 0755
+    owner: debian
+    group: debian
+  with_items:
+    - "pooposting-frontend"
+    - "pooposting-backend"
+- name: Pobranie zawartości repozytoriów do katalogów
+  ansible.builtin.git:
+    repo: "{{ item.repo }}"
+    dest: "/home/debian/{{ item.catalog }}"
+    version: "main"
+    single_branch: true
+  with_items:
+    - { repo: 'https://github.com/PooPosting/Front-end.git', catalog: 'pooposting-frontend' }
+    - { repo: 'https://github.com/PooPosting/Back-end.git', catalog: 'pooposting-backend' }
+- name: Zmiana uprawnień
+  ansible.builtin.file:
+    path: "/home/debian/{{ item }}"
+    owner: debian
+    group: debian
+    recurse: true
+  with_items:
+    - "pooposting-frontend"
+    - "pooposting-backend"
 - name: Podrzucenie konfiguracji nginx pooposting
   notify: Restart nginx
   block:
