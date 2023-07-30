@@ -51,6 +51,8 @@
       - dotnet-sdk-7.0
       - aspnetcore-runtime-7.0
       - nodejs
+      - npm
+      - git
     state: present
 - name: Instalacja PHP dla PHPMyAdmin
   block:
