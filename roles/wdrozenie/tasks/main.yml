@@ -1,0 +1,100 @@
+---
+- name: Sprawdzanie, czy użytkownik istnieje
+  block:
+    - name: Przywołanie bazy danych użytkowników
+      ansible.builtin.getent:
+        database: passwd
+    - name: Przywołanie bazy danych grup
+      ansible.builtin.getent:
+        database: group
+    - name: Dodawanie grupy usera, jeśli nie istnieje
+      ansible.builtin.group:
+        name: "{{ item.username }}"
+        state: present
+      with_items: "{{ users }}"
+    - name: Dodawanie usera, jeśli nie ma go w bazie
+      ansible.builtin.user:
+        name: "{{ item.username }}"
+        group: "{{ item.username }}"
+        groups: "{{ item.groups }}"
+        password: "{{ item.user_pass | string | password_hash('sha512') }}"
+        shell: "/bin/bash"
+      with_items:
+        - "{{ users }}"
+    - name: Dodawanie klucza dla usera
+      ansible.posix.authorized_key:
+        user: "{{ item.username }}"
+        state: present
+        key: "{{ item.ssh_public_key }}"
+      with_items: "{{ users }}"
+- name: Instalacja fail2ban
+  ansible.builtin.apt:
+    update_cache: true
+    name: fail2ban
+    state: present
+  notify: Autostart f2b
+- name: Podrzucenie configu f2b
+  ansible.builtin.copy:
+    src: "fail2ban.local"
+    dest: "/etc/fail2ban/jail.local"
+    mode: 0644
+    force: true
+  notify: Restart f2b
+- name: Zmiana ustawień SSH
+  ansible.builtin.lineinfile:
+    path: "/etc/ssh/sshd_config"
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.replace }}"
+  with_items:
+    - { regexp: '^PasswordAuthentication', replace: 'PasswordAuthentication yes' }
+  notify: Restart SSH
+- name: Konfiguracja firewalla
+  block:
+    - name: Instalacja pakietów
+      ansible.builtin.apt:
+        update_cache: true
+        name:
+          - iptables
+          - iptables-persistent
+        state: present
+    - name: Zezwalanie na połączenia na lo
+      ansible.builtin.iptables:
+        chain: INPUT
+        in_interface: lo
+        jump: ACCEPT
+        ip_version: "{{ item }}"
+      with_items:
+        - ipv4
+        - ipv6
+    - name: Zezwalanie na połączenia nawiązane (ipv4 + ipv6)
+      ansible.builtin.iptables:
+        chain: INPUT
+        ctstate: ESTABLISHED,RELATED
+        jump: ACCEPT
+        ip_version: "{{ item }}"
+      with_items:
+        - ipv4
+        - ipv6
+    - name: Zezwalanie na SSH
+      ansible.builtin.iptables:
+        chain: INPUT
+        protocol: tcp
+        destination_port: 22
+        jump: ACCEPT
+    - name: Zrzucanie reszty INPUT, FORWARD, ipv4, ipv6
+      ansible.builtin.iptables:
+        chain: "{{ item[0] }}"
+        policy: "DROP"
+        ip_version: "{{ item[1] }}"
+      with_nested:
+        - ['INPUT', 'FORWARD']
+        - ['ipv4', 'ipv6']
+    - name: Zapis iptables-persistent
+      community.general.iptables_state:
+        state: saved
+        ip_version: "{{ item.version }}"
+        path: "/etc/iptables/rules.{{ item.name }}"
+      with_items:
+        - { version: 'ipv4', name: 'v4' }
+        - { version: 'ipv6', name: 'v6' }
+...
