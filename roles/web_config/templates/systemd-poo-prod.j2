@@ -1,0 +1,19 @@
+[Unit]
+Description=PooPostingAPI, Production environment
+
+[Service]
+WorkingDirectory=/var/www/pooposting-prod/api
+ExecStart=/usr/bin/dotnet /var/www/pooposting-prod/api/PooPosting.Api.dll
+Restart=always
+# Restart service after 10 seconds if the dotnet service crashes:
+RestartSec=10
+KillSignal=SIGINT
+SyslogIdentifier=pooposting-api-production
+User=root
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=false
+Environment=ASPNETCORE_URLS=http://localhost:7200
+
+
+[Install]
+WantedBy=multi-user.target

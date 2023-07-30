@@ -1,0 +1,189 @@
+---
+- name: Instalacja nginx i mariadb
+  ansible.builtin.apt:
+    update_cache: true
+    name:
+      - nginx-full
+      - mariadb-server
+      - mariadb-client
+      - python3-mysqldb
+  notify: "Start LEM"
+- name: Zezwolenie na ruch HTTP i HTTPS
+  ansible.builtin.iptables:
+    chain: INPUT
+    protocol: tcp
+    destination_port: "{{ item }}"
+    jump: ACCEPT
+  with_items:
+    - 80
+    - 443
+- name: Zapis iptables-persistent
+  community.general.iptables_state:
+    state: saved
+    ip_version: "{{ item.version }}"
+    path: "/etc/iptables/rules.{{ item.name }}"
+  with_items:
+    - { version: 'ipv4', name: 'v4' }
+    - { version: 'ipv6', name: 'v6' }
+- name: Tworzenie baz danych
+  community.mysql.mysql_db:
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    name: "{{ item.db_name }}"
+    state: present
+  with_items: "{{ db_users }}"
+- name: Konfiguracja użytkownika (administracyjnego) bazy danych
+  community.mysql.mysql_user:
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    name: "{{ item.username }}"
+    password: "{{ item.password }}"
+    priv: "{{ item.db_name }}.*:ALL"
+    state: present
+  with_items: "{{ db_users }}"
+- name: Instalacja repozytoriów serwera DOTNet
+  ansible.builtin.apt:
+    deb: "https://packages.microsoft.com/config/debian/11/packages-microsoft-prod.deb"
+    state: present
+- name: Instalacja zależności
+  ansible.builtin.apt:
+    update_cache: true
+    name:
+      - apt-transport-https
+      - dotnet-sdk-7.0
+      - aspnetcore-runtime-7.0
+      - nodejs
+    state: present
+- name: Instalacja PHP dla PHPMyAdmin
+  block:
+    - name: Instalacja Gnupg
+      ansible.builtin.apt:
+        name: gnupg
+        state: present
+    - name: Dodanie klucza GPG PHP
+      ansible.builtin.apt_key:
+        url: https://packages.sury.org/php/apt.gpg
+        state: present
+        keyring: /usr/share/keyrings/deb.sury.org-php.gpg
+    - name: Dodanie repo PHP
+      ansible.builtin.apt_repository:
+        repo: deb [signed-by=/usr/share/keyrings/deb.sury.org-php.gpg] https://packages.sury.org/php/ {{ ansible_facts['distribution_release'] }} main
+    - name: Instalacja modułów PHP
+      ansible.builtin.apt:
+        update_cache: true
+        name:
+          - php8.1-fpm
+          - php8.1-mbstring
+          - php8.1-bcmath
+          - php8.1-xml
+          - php8.1-mysql
+          - php8.1-common
+          - php8.1-gd
+          - php8.1-cli
+          - php8.1-curl
+          - php8.1-zip
+        state: present
+      notify: Start PHP
+- name: Instalacja unzip i tar
+  ansible.builtin.apt:
+    update_cache: true
+    name:
+      - tar
+      - unzip
+    state: present
+- name: Pobranie PHPMyAdmin
+  ansible.builtin.unarchive:
+    dest: /var/www
+    remote_src: true
+    src: https://files.phpmyadmin.net/phpMyAdmin/5.2.1/phpMyAdmin-5.2.1-all-languages.zip
+- name: Wrzucenie całości do odpowiedniego katalogu
+  ansible.builtin.copy:
+    src: /var/www/phpMyAdmin-5.2.1-all-languages/
+    dest: /var/www/phpmyadmin
+    mode: 0755
+    owner: www-data
+    group: www-data
+    force: false
+    remote_src: true
+- name: Kasowanie pobranego archiwum
+  ansible.builtin.file:
+    state: absent
+    path: /var/www/phpMyAdmin-5.2.1-all-languages
+- name: Stworzenie pliku konfiguracyjnego
+  ansible.builtin.copy:
+    src: /var/www/phpmyadmin/config.sample.inc.php
+    dest: /var/www/phpmyadmin/config.inc.php
+    mode: 0644
+    remote_src: true
+    owner: www-data
+    group: www-data
+- name: Dodanie hasha do pliku konfiguracyjnego
+  ansible.builtin.lineinfile:
+    path: /var/www/phpmyadmin/config.inc.php
+    regexp: "blowfish_secret"
+    line: "$cfg['blowfish_secret'] = '{{ lookup('community.general.random_string') | password_hash(hashtype='blowfish') }}';"
+- name: Konfiguracja nginx phpmyadmin
+  notify: Restart nginx
+  block:
+    - name: Podrzucenie vhosta nginx dla phpmyadmin
+      ansible.builtin.template:
+        src: pma-nginx.j2
+        dest: "/etc/nginx/sites-available/{{ pma_domain }}.conf"
+        mode: 0640
+        owner: root
+        group: root
+    - name: Uruchomienie konfiguracji nginx
+      ansible.builtin.file:
+        state: link
+        src: "/etc/nginx/sites-available/{{ pma_domain }}.conf"
+        dest: "/etc/nginx/sites-enabled/{{ pma_domain }}.conf"
+- name: Dodanie konfiguracji fail2ban do ochrony phpmyadmin
+  ansible.builtin.blockinfile:
+    state: present
+    insertafter: EOF
+    block: |
+      [phpmyadmin-syslog]
+      enabled = true
+      filter = phpmyadmin-syslog
+      logpath = /var/log/auth.log
+    path: /etc/fail2ban/jail.local
+    marker: ""
+  notify: Restart f2b
+- name: Stworzenie katalogów w /var/www
+  ansible.builtin.file:
+    path: "/var/www/{{ item }}"
+    state: directory
+    mode: 0755
+  with_items:
+    - "pooposting-dev"
+    - "pooposting-prod"
+- name: Podrzucenie konfiguracji nginx pooposting
+  notify: Restart nginx
+  block:
+    - name: Podrzucenie templateów
+      ansible.builtin.template:
+        src: "{{ item.src }}"
+        dest: "/etc/nginx/sites-available/{{ item.dest }}"
+        mode: 0644
+        owner: root
+        group: root
+      with_items:
+        - { src: 'nginx-poo-prod.j2', dest: 'pooposting-prod' }
+        - { src: 'nginx-poo-dev.j2', dest: 'pooposting-dev' }
+    - name: Uruchomienie konfiguracji nginx pooposting
+      ansible.builtin.file:
+        state: link
+        src: "/etc/nginx/sites-available/{{ item }}"
+        dest: "/etc/nginx/sites-enabled/{{ item }}"
+      with_items:
+        - pooposting-prod
+        - pooposting-dev
+- name: Podrzucenie konfiguracji systemd
+  ansible.builtin.template:
+    mode: 0640
+    src: "{{ item.src }}"
+    dest: "/etc/systemd/system/{{ item.dest }}"
+    owner: root
+    group: root
+  with_items:
+    - { src: 'systemd-poo-dev.j2', dest: 'pooposting-api-dev.service' }
+    - { src: 'systemd-poo-prod.j2', dest: 'pooposting-api-prod.service' }
+...
