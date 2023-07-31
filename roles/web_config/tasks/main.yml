@@ -50,21 +50,32 @@
       - apt-transport-https
       - dotnet-sdk-7.0
       - aspnetcore-runtime-7.0
-      - nodejs
       - npm
       - git
+      - gnupg
     state: present
 - name: Instalacja angular npm
   community.general.npm:
     name: "@angular/cli"
     global: true
     state: present
+- name: Instalacja nodejs
+  block:
+    - name: Dodanie klucza GPG Nodejs
+      ansible.builtin.apt_key:
+        url: https://deb.nodesource.com/gpgkey/nodesource.gpg.key
+        state: present
+        keyring: /usr/share/keyrings/nodesource.gpg
+    - name: Dodanie repo Nodejs
+      ansible.builtin.apt_repository:
+        repo: "deb [signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_18.x {{ ansible_facts['distribution_release'] }} main"
+    - name: Instalacja Nodejs
+      ansible.builtin.apt:
+        name: nodejs=18*
+        update_cache: true
+        state: present
 - name: Instalacja PHP dla PHPMyAdmin
   block:
-    - name: Instalacja Gnupg
-      ansible.builtin.apt:
-        name: gnupg
-        state: present
     - name: Dodanie klucza GPG PHP
       ansible.builtin.apt_key:
         url: https://packages.sury.org/php/apt.gpg
