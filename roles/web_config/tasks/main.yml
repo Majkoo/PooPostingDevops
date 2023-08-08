@@ -50,30 +50,29 @@
       - apt-transport-https
       - dotnet-sdk-7.0
       - aspnetcore-runtime-7.0
-      - npm
       - git
-      - gnupg
     state: present
+- name: Instalacja nodejs
+  block:
+    - name: Pobranie skryptu instalacyjnego
+      ansible.builtin.get_url:
+        url: https://deb.nodesource.com/setup_18.x
+        dest: /tmp/nodejs.sh
+        mode: '+x'
+    - name: Instalacja repo nodejs
+      ansible.builtin.command:
+        bash /tmp/nodejs.sh
+      changed_when: true
+    - name: Instalacja nodejs
+      ansible.builtin.apt:
+        update_cache: true
+        name: nodejs
+        state: present
 - name: Instalacja angular npm
   community.general.npm:
     name: "@angular/cli"
     global: true
     state: present
-- name: Instalacja nodejs
-  block:
-    - name: Dodanie klucza GPG Nodejs
-      ansible.builtin.apt_key:
-        url: https://deb.nodesource.com/gpgkey/nodesource.gpg.key
-        state: present
-        keyring: /usr/share/keyrings/nodesource.gpg
-    - name: Dodanie repo Nodejs
-      ansible.builtin.apt_repository:
-        repo: "deb [signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_18.x {{ ansible_facts['distribution_release'] }} main"
-    - name: Instalacja Nodejs
-      ansible.builtin.apt:
-        name: nodejs=18*
-        update_cache: true
-        state: present
 - name: Instalacja PHP dla PHPMyAdmin
   block:
     - name: Dodanie klucza GPG PHP
@@ -181,26 +180,55 @@
     owner: debian
     group: debian
   with_items:
-    - "pooposting-frontend"
-    - "pooposting-backend"
+    - "pooposting-frontend-prod"
+    - "pooposting-frontend-dev"
+    - "pooposting-backend-prod"
+    - "pooposting-backend-dev"
 - name: Pobranie zawartości repozytoriów do katalogów
   ansible.builtin.git:
     repo: "{{ item.repo }}"
     dest: "/home/debian/{{ item.catalog }}"
-    version: "main"
+    version: "{{ item.branch }}"
     single_branch: true
   with_items:
-    - { repo: 'https://github.com/PooPosting/Front-end.git', catalog: 'pooposting-frontend' }
-    - { repo: 'https://github.com/PooPosting/Back-end.git', catalog: 'pooposting-backend' }
-- name: Zmiana uprawnień
-  ansible.builtin.file:
-    path: "/home/debian/{{ item }}"
-    owner: debian
-    group: debian
-    recurse: true
+    - { repo: 'https://github.com/PooPosting/Front-end.git', catalog: 'pooposting-frontend-prod', branch: 'main' }
+    - { repo: 'https://github.com/PooPosting/Front-end.git', catalog: 'pooposting-frontend-dev', branch: 'development' }
+    - { repo: 'https://github.com/PooPosting/Back-end.git', catalog: 'pooposting-backend-prod', branch: 'main' }
+    - { repo: 'https://github.com/PooPosting/Back-end.git', catalog: 'pooposting-backend-dev', branch: 'development' }
+- name: Npm install w repo frontu
+  community.general.npm:
+    path: "/home/debian/pooposting-frontend-{{ item }}"
+    state: present
   with_items:
-    - "pooposting-frontend"
-    - "pooposting-backend"
+    - "prod"
+    - "dev"
+- name: Ng build
+  ansible.builtin.command:
+    chdir: "/home/debian/pooposting-frontend-{{ item }}"
+    cmd: ng build
+  changed_when: true
+  with_items:
+    - "prod"
+    - "dev"
+- name: Skopiowanie plików na odpowiednie miejsca
+  ansible.builtin.copy:
+    src: "/home/debian/pooposting-frontend-{{ item }}/dist/"
+    dest: "/var/www/pooposting-{{ item }}"
+    owner: www-data
+    group: www-data
+    remote_src: true
+    mode: 0755
+  with_items:
+    - "prod"
+    - "dev"
+- name: Kasowanie katalogu dist
+  ansible.builtin.file:
+    state: absent
+    path: "/home/debian/pooposting-frontend-{{ item }}/dist"
+  with_items:
+    - "prod"
+    - "dev"
+# Deploy backendu
 - name: Podrzucenie konfiguracji nginx pooposting
   notify: Restart nginx
   block:
