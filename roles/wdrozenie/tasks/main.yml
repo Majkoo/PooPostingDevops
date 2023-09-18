@@ -27,10 +27,12 @@
         state: present
         key: "{{ item.ssh_public_key }}"
       with_items: "{{ users }}"
-- name: Instalacja fail2ban
+- name: Instalacja fail2ban i rsyslog
   ansible.builtin.apt:
     update_cache: true
-    name: fail2ban
+    name:
+      - rsyslog
+      - fail2ban
     state: present
   notify: Autostart f2b
 - name: Podrzucenie configu f2b
