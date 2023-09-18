@@ -8,6 +8,20 @@
       - mariadb-client
       - python3-mysqldb
   notify: "Start LEM"
+- name: Przeniesienie skryptu na zdalną maszynę
+  ansible.builtin.copy:
+    src: ips.sh
+    dest: /tmp/ips.sh
+    mode: 0740
+    owner: root
+    group: root
+  tags: test
+- name: Konfiguracja nginx realip
+  ansible.builtin.script: ips.sh
+  args:
+    chdir: /tmp
+  notify: Restart nginx
+  tags: test
 - name: Zezwolenie na ruch HTTP i HTTPS
   ansible.builtin.iptables:
     chain: INPUT
