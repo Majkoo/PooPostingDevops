@@ -1,0 +1,63 @@
+name: Deploy Dotnet environement
+run-name: ${{ github.actor }} wdraża
+on: [workflow_dispatch]
+jobs:
+  Wdrażaj:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Udało się!"
+      - name: Git repo
+        uses: actions/checkout@v3
+      - name: Zmiana zmiennych w pliku wdrozenie
+        uses: "DamianReeves/write-file-action@master"
+        with:
+          path: roles/wdrozenie/vars/main.yml
+          write-mode: overwrite
+          contents: |
+            ---
+            users:
+              - username: "${{ secrets.USERNAME }}"
+                user_pass: "${{ secrets.USER_PASS }}"
+                groups: "sudo"
+                ssh_public_key: "${{ secrets.SSH_PRIVATE_KEY }}"
+              - username: "root"
+                user_pass: "${{ secrets.ROOT_PASS }}"
+                groups: "root"
+                ssh_public_key: "${{ secrets.ROOT_SSH_PRIVATE_KEY }}"
+            ...
+      - name: Zmiana zmiennych w pliku web_config
+        uses: "DamianReeves/write-file-action@master"
+        with:
+          path: roles/web_config/vars/main.yml
+          write-mode: overwrite
+          contents: |
+            ---
+            pma_domain: "${{ secrets.PMA_DOMAIN }}"
+            db_users:
+              - username: "${{ secrets.DB_USERNAME }}-dev"
+                password: "${{ secrets.DB_PASSWORD }}"
+                db_name: "${{ secrets.DB_NAME }}dev"
+                type: dev
+                pooposting_domain: "dev.${{ secrets.APP_DOMAIN }}"
+              - username: "${{ secrets.DB_USERNAME }}-prod"
+                password: "${{ secrets.DB_PASSWORD }}"
+                db_name: "${{ secrets.DB_NAME }}"
+                type: prod
+                pooposting_domain: "${{ secrets.APP_DOMAIN }}"
+            ...
+      - name: Dodanie pliku appswttings
+        uses: "DamianReeves/write-file-action@master"
+        with:
+          path: roles/web_config/templates/appsettings.json.j2
+          write-mode: overwrite
+          contents: |
+            ${{ secrets.APP_SETTINGS }}
+      - name: Run ansible playbook
+        uses: dawidd6/action-ansible-playbook@master
+        with:
+          playbook: playbook.yml
+          directory: ./
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          inventory: |
+            [vps]
+            ${{ secrets.IP }}

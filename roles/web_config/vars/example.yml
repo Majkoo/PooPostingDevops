@@ -1,0 +1,10 @@
+---
+pma_domain: phpmyadmin.example.com
+db_users:
+  - username: example
+    password: password
+    db_name: example_db
+  - username: example2
+    password: password2
+    db_name: example_db2
+...
