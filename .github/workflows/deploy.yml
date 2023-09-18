@@ -19,11 +19,11 @@ jobs:
               - username: "${{ secrets.USERNAME }}"
                 user_pass: "${{ secrets.USER_PASS }}"
                 groups: "sudo"
-                ssh_public_key: "${{ secrets.SSH_PRIVATE_KEY }}"
+                ssh_public_key: "${{ secrets.SSH_PUBLIC_KEY }}"
               - username: "root"
                 user_pass: "${{ secrets.ROOT_PASS }}"
                 groups: "root"
-                ssh_public_key: "${{ secrets.ROOT_SSH_PRIVATE_KEY }}"
+                ssh_public_key: "${{ secrets.ROOT_SSH_PUBLIC_KEY }}"
             ...
       - name: Zmiana zmiennych w pliku web_config
         uses: "DamianReeves/write-file-action@master"
