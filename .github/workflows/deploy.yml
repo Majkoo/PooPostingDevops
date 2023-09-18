@@ -2,7 +2,7 @@ name: Deploy Dotnet environement
 run-name: ${{ github.actor }} wdraża
 on: [workflow_dispatch]
 jobs:
-  Wdrażaj:
+  Deploy:
     runs-on: ubuntu-latest
     steps:
       - run: echo "Udało się!"
