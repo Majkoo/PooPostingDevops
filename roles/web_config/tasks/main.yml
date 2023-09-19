@@ -8,6 +8,20 @@
       - mariadb-client
       - python3-mysqldb
   notify: "Start LEM"
+- name: Przeniesienie skryptu na zdalną maszynę
+  ansible.builtin.copy:
+    src: ips.sh
+    dest: /tmp/ips.sh
+    mode: 0740
+    owner: root
+    group: root
+  tags: test
+- name: Konfiguracja nginx realip
+  ansible.builtin.script: ips.sh
+  args:
+    chdir: /tmp
+  notify: Restart nginx
+  tags: test
 - name: Zezwolenie na ruch HTTP i HTTPS
   ansible.builtin.iptables:
     chain: INPUT
@@ -35,7 +49,7 @@
   with_items: "{{ db_users }}"
 - name: Instalacja repozytoriów serwera DOTNet
   ansible.builtin.apt:
-    deb: "https://packages.microsoft.com/config/debian/11/packages-microsoft-prod.deb"
+    deb: "https://packages.microsoft.com/config/debian/{{ ansible_distribution_major_version }}/packages-microsoft-prod.deb"
     state: present
 - name: Instalacja zależności
   ansible.builtin.apt:
@@ -48,15 +62,22 @@
     state: present
 - name: Instalacja nodejs
   block:
-    - name: Pobranie skryptu instalacyjnego
-      ansible.builtin.get_url:
-        url: https://deb.nodesource.com/setup_18.x
-        dest: /tmp/nodejs.sh
-        mode: '+x'
-    - name: Instalacja repo nodejs
-      ansible.builtin.command:
-        bash /tmp/nodejs.sh
-      changed_when: true
+    - name: Instalacja zależności
+      ansible.builtin.apt:
+        update_cache: true
+        state: present
+        name:
+          - ca-certificates
+          - curl
+          - gnupg
+    - name: Dodanie klucza GPG nodejs
+      ansible.builtin.apt_key:
+        url: https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key
+        state: present
+        keyring: /etc/apt/keyrings/nodesource.gpg
+    - name: Dodanie repo Nodejs
+      ansible.builtin.apt_repository:
+        repo: "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_18.x nodistro main"
     - name: Instalacja nodejs
       ansible.builtin.apt:
         update_cache: true
