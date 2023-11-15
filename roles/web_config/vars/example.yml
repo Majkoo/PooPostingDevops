@@ -7,4 +7,6 @@ db_users:
   - username: example2
     password: password2
     db_name: example_db2
+
+d_version: 7.0
 ...
