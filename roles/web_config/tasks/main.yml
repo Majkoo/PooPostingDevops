@@ -217,7 +217,7 @@
 - name: Ng build
   ansible.builtin.command:
     chdir: "/home/debian/pooposting-frontend-{{ item.type }}"
-    cmd: ng build
+    cmd: "ng build -c {{ item.type }}-server"
   changed_when: true
   with_items:
     - "{{ db_users }}"
