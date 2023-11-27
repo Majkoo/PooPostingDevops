@@ -44,7 +44,7 @@ jobs:
                 db_name: "${{ secrets.DB_NAME }}"
                 type: prod
                 pooposting_domain: "${{ secrets.APP_DOMAIN }}"
-            d_version: 7.0
+            d_version: 8.0
             ...
       - name: Dodanie pliku appsettings
         uses: "DamianReeves/write-file-action@master"
