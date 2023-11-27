@@ -8,5 +8,5 @@ db_users:
     password: password2
     db_name: example_db2
 
-d_version: 7.0
+d_version: 8.0
 ...
