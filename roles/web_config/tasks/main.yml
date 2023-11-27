@@ -253,7 +253,8 @@
 - name: Wykonanie dotnet ef db update
   ansible.builtin.shell:
     chdir: "/home/debian/pooposting-backend-{{ item.type }}/PooPosting.Api"
-    cmd: "export PATH=\"$PATH:$HOME/.dotnet/tools\" && dotnet ef database update"
+    cmd: "export PATH=\"$PATH:$HOME/.dotnet/tools\" && dotnet ef database update --project PooPosting.Domain\PooPosting.Domain.csproj \
+          --startup-project PooPosting.Api\PooPosting.Api.csproj --context PooPosting.Domain.DbContext.PictureDbContext"
   changed_when: true
   with_items:
     - "{{ db_users }}"
