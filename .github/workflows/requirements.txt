@@ -1,0 +1,3 @@
+pynacl
+json
+requests

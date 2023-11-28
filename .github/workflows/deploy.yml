@@ -8,6 +8,16 @@ jobs:
       - run: echo "Udało się!"
       - name: Git repo
         uses: actions/checkout@v3
+      - name: Uruchomienie skryptu python
+        env:
+          API_KEY_DEVOPS: ${{secrets.API_KEY_DEVOPS}}
+          aktualizowac: "owszem"
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f .github/workflows/requirements.txt ]; then
+            pip install -r requirements.txt; 
+          fi
+          python -u .github/workflows/varsManage.py
       - name: Zmiana zmiennych w pliku wdrozenie
         uses: "DamianReeves/write-file-action@master"
         with:
