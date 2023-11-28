@@ -40,8 +40,8 @@
 - name: Konfiguracja użytkownika (administracyjnego) bazy danych
   community.mysql.mysql_user:
     login_unix_socket: /var/run/mysqld/mysqld.sock
-    name: "{{ item.username }}"
-    password: "{{ item.password }}"
+    name: "{{ item.type }}{{ item.username }}"
+    password: "{{ item.type }}{{ item.password }}"
     priv: "*.*:ALL"
     state: present
   with_items: "{{ db_users }}"

@@ -1,13 +1,13 @@
 ---
 pma_domain: ${PMA_DOMAIN}
 db_users:
-  - username: prod${DB_USERNAME}
-    password: prod${DB_PASS}
+  - username: ${DB_USERNAME}
+    password: ${DB_PASS}
     db_name: prod${DB_NAME}
     type: prod
     dType: ""
-  - username: dev${DB_USERNAME}
-    password: dev${DB_PASS}
+  - username: ${DB_USERNAME}
+    password: ${DB_PASS}
     db_name: dev${DB_NAME}
     type: dev
     dType: ".Development"
