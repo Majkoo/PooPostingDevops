@@ -244,7 +244,7 @@
 - name: Podrzucenie pliku appsettings
   ansible.builtin.template:
     src: "{{ item.type }}-appsettings.json"
-    dest: "/home/debian/pooposting-backend-{{ item.type }}/PooPosting.Api/appsettings{{ item.dType }}.json"
+    dest: "/home/debian/pooposting-backend-{{ item.type }}/PooPosting.Api/appsettings.json"
     owner: root
     group: root
     mode: 0400

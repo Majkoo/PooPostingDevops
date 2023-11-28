@@ -4,11 +4,9 @@ db_users:
   - username: ${DB_USERNAME}
     password: ${DB_PASS}
     type: prod
-    dType: ""
   - username: ${DB_USERNAME}
     password: ${DB_PASS}
     type: dev
-    dType: ".Development"
 
 d_version: ^{DOTNET_VERSION}
 ...
