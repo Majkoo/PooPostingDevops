@@ -42,7 +42,7 @@ jobs:
         uses: faradaytrs/substitute-secrets-action@2.1
         with:
           input: roles/web_config/templates/prod-appsettings.json
-          substitutionRegex: \$\{([A-Z0-9_]+)\}
+          substitutionRegex: ^\$\{([A-Z0-9_]+)\}$
           substitutionData: ${{ toJSON(secrets) }}
 
       - name: Show me 1
@@ -54,7 +54,7 @@ jobs:
         uses: faradaytrs/substitute-secrets-action@2.1
         with:
           input: roles/web_config/templates/dev-appsettings.json
-          substitutionRegex: \$\{([A-Z0-9_]+)\}
+          substitutionRegex: ^\$\{([A-Z0-9_]+)\}$
           substitutionData: ${{ toJSON(secrets) }}
 
       - name: Show me 2
