@@ -46,7 +46,7 @@ jobs:
         with:
           input: roles/web_config/templates/prod-appsettings.json.j2
           substitutionRegex: \$\{([A-Z0-9_]+)\}
-          substitutionData: ${{ toJSON(vars) }}
+          substitutionData: ${{ toJSON(secrets) }}
       - name: Zaciągnięcie pliku appsettings
         uses: suisei-cn/actions-download-file@v1.3.0
         with:
@@ -57,7 +57,7 @@ jobs:
         with:
           input: roles/web_config/templates/dev-appsettings.json.j2
           substitutionRegex: \$\{([A-Z0-9_]+)\}
-          substitutionData: ${{ toJSON(vars) }}
+          substitutionData: ${{ toJSON(secrets) }}
       - name: Run ansible playbook
         uses: dawidd6/action-ansible-playbook@master
         with:
