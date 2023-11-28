@@ -19,57 +19,38 @@ jobs:
           fi
           python -u .github/workflows/varsManage.py
       - name: Wypełnianie plików sekretami
-        uses: Lambdaspire/action-substitute-secrets-in-file@v1.0.0
+        uses: faradaytrs/substitute-secrets-action@v1.0.0
         with:
-          file: roles/wdrozenie/vars/example.yml
-          output: roles/wdrozenie/vars/main.yml
-          tokenPattern: ${TOKEN}
-          secretsJson: ${{ toJSON(secrets) }}
+          input: roles/wdrozenie/vars/main.yml
+          substitutionRegex: \$\{([A-Z0-9_]+)\}
+          substitutionData: ${{ toJSON(secrets) }}
       - name: Wypełnianie plików sekretami
-        uses: Lambdaspire/action-substitute-secrets-in-file@v1.0.0
+        uses: faradaytrs/substitute-secrets-action@v1.0.0
         with:
-          file: roles/wdrozenie/vars/example.yml
-          output: roles/wdrozenie/vars/main.yml
-          tokenPattern: ^{TOKEN}
-          secretsJson: ${{ toJSON(vars) }}
-      #- name: Zmiana zmiennych w pliku wdrozenie
+          input: roles/web_config/vars/main.yml
+          substitutionRegex: \^\{([A-Z0-9_]+)\}
+          substitutionData: ${{ toJSON(vars) }}
+      #- name: Zmiana zmiennych w pliku web_config
       #  uses: "DamianReeves/write-file-action@master"
       #  with:
-      #    path: roles/wdrozenie/vars/main.yml
+      #    path: roles/web_config/vars/main.yml
       #    write-mode: overwrite
       #    contents: |
       #      ---
-      #      users:
-      #        - username: "${{ secrets.USERNAME }}"
-      #          user_pass: "${{ secrets.USER_PASS }}"
-      #          groups: "sudo"
-      #          ssh_public_key: "${{ secrets.SSH_PUBLIC_KEY }}"
-      #        - username: "root"
-      #          user_pass: "${{ secrets.ROOT_PASS }}"
-      #          groups: "root"
-      #          ssh_public_key: "${{ secrets.ROOT_SSH_PUBLIC_KEY }}"
+      #      pma_domain: "${{ secrets.PMA_DOMAIN }}"
+      #      db_users:
+      #        - username: "${{ secrets.DB_USERNAME }}-dev"
+      #          password: "${{ secrets.DB_PASSWORD }}"
+      #          db_name: "${{ secrets.DB_NAME }}dev"
+      #          type: dev
+      #          pooposting_domain: "dev.${{ secrets.APP_DOMAIN }}"
+      #        - username: "${{ secrets.DB_USERNAME }}-prod"
+      #          password: "${{ secrets.DB_PASSWORD }}"
+      #          db_name: "${{ secrets.DB_NAME }}"
+      #          type: prod
+      #          pooposting_domain: "${{ secrets.APP_DOMAIN }}"
+      #      d_version: 8.0
       #      ...
-      - name: Zmiana zmiennych w pliku web_config
-        uses: "DamianReeves/write-file-action@master"
-        with:
-          path: roles/web_config/vars/main.yml
-          write-mode: overwrite
-          contents: |
-            ---
-            pma_domain: "${{ secrets.PMA_DOMAIN }}"
-            db_users:
-              - username: "${{ secrets.DB_USERNAME }}-dev"
-                password: "${{ secrets.DB_PASSWORD }}"
-                db_name: "${{ secrets.DB_NAME }}dev"
-                type: dev
-                pooposting_domain: "dev.${{ secrets.APP_DOMAIN }}"
-              - username: "${{ secrets.DB_USERNAME }}-prod"
-                password: "${{ secrets.DB_PASSWORD }}"
-                db_name: "${{ secrets.DB_NAME }}"
-                type: prod
-                pooposting_domain: "${{ secrets.APP_DOMAIN }}"
-            d_version: 8.0
-            ...
       - name: Dodanie pliku appsettings
         uses: "DamianReeves/write-file-action@master"
         with:
