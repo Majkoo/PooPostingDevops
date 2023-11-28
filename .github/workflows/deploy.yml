@@ -36,13 +36,28 @@ jobs:
           input: roles/web_config/vars/main.yml
           substitutionRegex: \^\{([A-Z0-9_]+)\}
           substitutionData: ${{ toJSON(vars) }}
-      - name: Dodanie pliku appsettings
-        uses: "DamianReeves/write-file-action@master"
+      - name: Zaciągnięcie pliku appsettings
+        uses: suisei-cn/actions-download-file@v1.3.0
         with:
-          path: roles/web_config/templates/appsettings.json.j2
-          write-mode: overwrite
-          contents: |
-            ${{ secrets.APP_SETTINGS }}
+          url: "https://raw.githubusercontent.com/PooPosting/Back-end/master/PooPosting.Api/appsettings.Template.json"
+          target: roles/web_config/templates/prod-appsettings.json.j2
+      - name: Wypełnianie plików zmiennymi
+        uses: faradaytrs/substitute-secrets-action@2.1
+        with:
+          input: roles/web_config/templates/prod-appsettings.json.j2
+          substitutionRegex: \^\{([A-Z0-9_]+)\}
+          substitutionData: ${{ toJSON(vars) }}
+      - name: Zaciągnięcie pliku appsettings
+        uses: suisei-cn/actions-download-file@v1.3.0
+        with:
+          url: "https://raw.githubusercontent.com/PooPosting/Back-end/development/PooPosting.Api/appsettings.Template.json"
+          target: roles/web_config/templates/dev-appsettings.json.j2
+      - name: Wypełnianie plików zmiennymi
+        uses: faradaytrs/substitute-secrets-action@2.1
+        with:
+          input: roles/web_config/templates/dev-appsettings.json.j2
+          substitutionRegex: \^\{([A-Z0-9_]+)\}
+          substitutionData: ${{ toJSON(vars) }}
       - name: Run ansible playbook
         uses: dawidd6/action-ansible-playbook@master
         with:

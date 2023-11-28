@@ -243,7 +243,7 @@
   changed_when: true
 - name: Podrzucenie pliku appsettings
   ansible.builtin.template:
-    src: appsettings.json.j2
+    src: "{{ item.type }}-appsettings.json.j2"
     dest: "/home/debian/pooposting-backend-{{ item.type }}/PooPosting.Api/appsettings.json"
     owner: root
     group: root
