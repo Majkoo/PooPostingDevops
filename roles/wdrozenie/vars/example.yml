@@ -1,23 +1,11 @@
 ---
 users:
-  - username: "example_user"
-    user_pass: "password"
+  - username: ${USERNAME}
+    user_pass: "${USER_PASS}"
     groups: "sudo"
-    ssh_public_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDdFKZHOAKrYh+tjCYQ\
-                    S06iybKdXzV4iwghIChqGt1kGUfwM8CzPo3HxnlOpX/OCRtJRYYMYr32Mq\
-                    J1ec2ZyDFel+lz+g0isrzrI4K+VH1fS8xILWz7+BIdA9Sj6/4+wnPpcSaG\
-                    HflobYRDshkkZQMBo5xkBB1KpSymmPh43f4yGmy/hMsS41EJPS2am72cLVq\
-                    4mFjpywi1CoSIu7Wg97Kx7PeKU6ZMiF3yclxSOg/UIp0uZDbHhKvG4sYtU6\
-                    ahUF263G4i2kQcWmRf+dfouhpQ0H7eTfIA+NCvmnsycXsl4WaIPJHOSsG9cX\
-                    ISE/Zs8QtyhtV5j+Yp4qtdexoEq9EF rsa-key-20230725"
+    ssh_public_key: "${SSH_PUBLIC_KEY}"
   - username: "root"
-    user_pass: "password2"
+    user_pass: "${ROOT_PASS}"
     groups: "root"
-    ssh_public_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDdFKZHOAKrYh+tjCYQ\
-                    S06iybKdXzV4iwghIChqGt1kGUfwM8CzPo3HxnlOpX/OCRtJRYYMYr32Mq\
-                    J1ec2ZyDFel+lz+g0isrzrI4K+VH1fS8xILWz7+BIdA9Sj6/4+wnPpcSaG\
-                    HflobYRDshkkZQMBo5xkBB1KpSymmPh43f4yGmy/hMsS41EJPS2am72cLVq\
-                    4mFjpywi1CoSIu7Wg97Kx7PeKU6ZMiF3yclxSOg/UIp0uZDbHhKvG4sYtU6\
-                    ahUF263G4i2kQcWmRf+dfouhpQ0H7eTfIA+NCvmnsycXsl4WaIPJHOSsG9cX\
-                    ISE/Zs8QtyhtV5j+Yp4qtdexoEq9EF rsa-key-20230725"
+    ssh_public_key: "${SSH_PUBLIC_KEY}"
 ...

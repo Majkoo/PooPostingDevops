@@ -18,23 +18,30 @@ jobs:
             pip install -r .github/workflows/requirements.txt; 
           fi
           python -u .github/workflows/varsManage.py
-      - name: Zmiana zmiennych w pliku wdrozenie
-        uses: "DamianReeves/write-file-action@master"
+      - name: Wypełnianie plików sekretami
+        uses: Lambdaspire/action-substitute-secrets-in-file@v1.0.0
         with:
-          path: roles/wdrozenie/vars/main.yml
-          write-mode: overwrite
-          contents: |
-            ---
-            users:
-              - username: "${{ secrets.USERNAME }}"
-                user_pass: "${{ secrets.USER_PASS }}"
-                groups: "sudo"
-                ssh_public_key: "${{ secrets.SSH_PUBLIC_KEY }}"
-              - username: "root"
-                user_pass: "${{ secrets.ROOT_PASS }}"
-                groups: "root"
-                ssh_public_key: "${{ secrets.ROOT_SSH_PUBLIC_KEY }}"
-            ...
+          file: roles/wdrozenie/vars/example.yml
+          output: roles/wdrozenie/vars/main.yml
+          tokenPattern: ${TOKEN}
+          secretsJson: ${{ toJSON(secrets) }}
+      #- name: Zmiana zmiennych w pliku wdrozenie
+      #  uses: "DamianReeves/write-file-action@master"
+      #  with:
+      #    path: roles/wdrozenie/vars/main.yml
+      #    write-mode: overwrite
+      #    contents: |
+      #      ---
+      #      users:
+      #        - username: "${{ secrets.USERNAME }}"
+      #          user_pass: "${{ secrets.USER_PASS }}"
+      #          groups: "sudo"
+      #          ssh_public_key: "${{ secrets.SSH_PUBLIC_KEY }}"
+      #        - username: "root"
+      #          user_pass: "${{ secrets.ROOT_PASS }}"
+      #          groups: "root"
+      #          ssh_public_key: "${{ secrets.ROOT_SSH_PUBLIC_KEY }}"
+      #      ...
       - name: Zmiana zmiennych w pliku web_config
         uses: "DamianReeves/write-file-action@master"
         with:
