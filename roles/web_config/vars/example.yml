@@ -1,12 +1,12 @@
 ---
-pma_domain: phpmyadmin.example.com
+pma_domain: ${PMA_DOMAIN}
 db_users:
-  - username: example
-    password: password
-    db_name: example_db
-  - username: example2
-    password: password2
-    db_name: example_db2
+  - username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    db_name: ${DB_NAME}
+  - username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    db_name: ${DB_NAME}
 
-d_version: 8.0
+d_version: %{DOTNET_VERSION}
 ...

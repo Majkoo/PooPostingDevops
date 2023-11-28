@@ -25,6 +25,13 @@ jobs:
           output: roles/wdrozenie/vars/main.yml
           tokenPattern: ${TOKEN}
           secretsJson: ${{ toJSON(secrets) }}
+      - name: Wypełnianie plików sekretami
+        uses: Lambdaspire/action-substitute-secrets-in-file@v1.0.0
+        with:
+          file: roles/wdrozenie/vars/example.yml
+          output: roles/wdrozenie/vars/main.yml
+          tokenPattern: %{TOKEN}
+          secretsJson: ${{ toJSON(vars) }}
       #- name: Zmiana zmiennych w pliku wdrozenie
       #  uses: "DamianReeves/write-file-action@master"
       #  with:
