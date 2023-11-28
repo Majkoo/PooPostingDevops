@@ -3,12 +3,10 @@ pma_domain: ${PMA_DOMAIN}
 db_users:
   - username: ${DB_USERNAME}
     password: ${DB_PASS}
-    db_name: prod${DB_NAME}
     type: prod
     dType: ""
   - username: ${DB_USERNAME}
     password: ${DB_PASS}
-    db_name: dev${DB_NAME}
     type: dev
     dType: ".Development"
 
