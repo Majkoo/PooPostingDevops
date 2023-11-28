@@ -5,10 +5,12 @@ db_users:
     password: ${DB_PASSWORD}
     db_name: ${DB_NAME}
     type: prod
+    dType: ""
   - username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     db_name: ${DB_NAME}
     type: dev
+    dType: ".Development"
 
 d_version: ^{DOTNET_VERSION}
 ...

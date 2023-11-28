@@ -40,22 +40,22 @@ jobs:
         uses: suisei-cn/actions-download-file@v1.3.0
         with:
           url: "https://raw.githubusercontent.com/PooPosting/Back-end/master/PooPosting.Api/appsettings.Template.json"
-          target: roles/web_config/templates/prod-appsettings.json.j2
+          target: roles/web_config/templates/prod-appsettings.json
       - name: Wypełnianie plików sekretami
         uses: faradaytrs/substitute-secrets-action@2.1
         with:
-          input: roles/web_config/templates/prod-appsettings.json.j2
+          input: roles/web_config/templates/prod-appsettings.json
           substitutionRegex: \$\{([A-Z0-9_]+)\}
           substitutionData: ${{ toJSON(secrets) }}
       - name: Zaciągnięcie pliku appsettings
         uses: suisei-cn/actions-download-file@v1.3.0
         with:
           url: "https://raw.githubusercontent.com/PooPosting/Back-end/development/PooPosting.Api/appsettings.Template.json"
-          target: roles/web_config/templates/dev-appsettings.json.j2
+          target: roles/web_config/templates/dev-appsettings.json
       - name: Wypełnianie plików sekretami
         uses: faradaytrs/substitute-secrets-action@2.1
         with:
-          input: roles/web_config/templates/dev-appsettings.json.j2
+          input: roles/web_config/templates/dev-appsettings.json
           substitutionRegex: \$\{([A-Z0-9_]+)\}
           substitutionData: ${{ toJSON(secrets) }}
       - name: Run ansible playbook
