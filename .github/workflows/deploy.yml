@@ -30,7 +30,7 @@ jobs:
         with:
           file: roles/wdrozenie/vars/example.yml
           output: roles/wdrozenie/vars/main.yml
-          tokenPattern: %{TOKEN}
+          tokenPattern: ^{TOKEN}
           secretsJson: ${{ toJSON(vars) }}
       #- name: Zmiana zmiennych w pliku wdrozenie
       #  uses: "DamianReeves/write-file-action@master"

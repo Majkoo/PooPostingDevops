@@ -8,5 +8,5 @@ db_users:
     password: ${DB_PASSWORD}
     db_name: ${DB_NAME}
 
-d_version: %{DOTNET_VERSION}
+d_version: ^{DOTNET_VERSION}
 ...
