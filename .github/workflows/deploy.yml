@@ -30,33 +30,12 @@ jobs:
           input: roles/web_config/vars/main.yml
           substitutionRegex: \$\{([A-Z0-9_]+)\}
           substitutionData: ${{ toJSON(secrets) }}
-      - name: Wypełnianie plików sekretami
+      - name: Wypełnianie plików zmiennymi
         uses: faradaytrs/substitute-secrets-action@2.1
         with:
           input: roles/web_config/vars/main.yml
           substitutionRegex: \^\{([A-Z0-9_]+)\}
           substitutionData: ${{ toJSON(vars) }}
-      #- name: Zmiana zmiennych w pliku web_config
-      #  uses: "DamianReeves/write-file-action@master"
-      #  with:
-      #    path: roles/web_config/vars/main.yml
-      #    write-mode: overwrite
-      #    contents: |
-      #      ---
-      #      pma_domain: "${{ secrets.PMA_DOMAIN }}"
-      #      db_users:
-      #        - username: "${{ secrets.DB_USERNAME }}-dev"
-      #          password: "${{ secrets.DB_PASSWORD }}"
-      #          db_name: "${{ secrets.DB_NAME }}dev"
-      #          type: dev
-      #          pooposting_domain: "dev.${{ secrets.APP_DOMAIN }}"
-      #        - username: "${{ secrets.DB_USERNAME }}-prod"
-      #          password: "${{ secrets.DB_PASSWORD }}"
-      #          db_name: "${{ secrets.DB_NAME }}"
-      #          type: prod
-      #          pooposting_domain: "${{ secrets.APP_DOMAIN }}"
-      #      d_version: 8.0
-      #      ...
       - name: Dodanie pliku appsettings
         uses: "DamianReeves/write-file-action@master"
         with:
