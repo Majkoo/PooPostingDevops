@@ -44,8 +44,6 @@ jobs:
           input: roles/web_config/templates/prod-appsettings.json
           substitutionRegex: \$\{([A-Z0-9_]+)\}
           substitutionData: ${{ toJSON(secrets) }}
-      - name: Wyświetlenie zawartości
-        run: cat roles/web_config/templates/prod-appsettings.json
       - name: Zaciągnięcie pliku appsettings
         run: "wget https://raw.githubusercontent.com/PooPosting/Back-end/development/PooPosting.Api/appsettings.Template.json -O roles/web_config/templates/dev-appsettings.json"
       - name: Wypełnianie plików sekretami
