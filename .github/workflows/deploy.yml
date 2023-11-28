@@ -37,10 +37,7 @@ jobs:
           substitutionRegex: \^\{([A-Z0-9_]+)\}
           substitutionData: ${{ toJSON(vars) }}
       - name: Zaciągnięcie pliku appsettings
-        uses: suisei-cn/actions-download-file@v1.3.0
-        with:
-          url: "https://raw.githubusercontent.com/PooPosting/Back-end/master/PooPosting.Api/appsettings.Template.json"
-          target: roles/web_config/templates/prod-appsettings.json
+        run: "wget https://raw.githubusercontent.com/PooPosting/Back-end/master/PooPosting.Api/appsettings.Template.json -O roles/web_config/templates/prod-appsettings.json"
       - name: Wypełnianie plików sekretami
         uses: faradaytrs/substitute-secrets-action@2.1
         with:
@@ -50,10 +47,7 @@ jobs:
       - name: Wyświetlenie zawartości
         run: cat roles/web_config/templates/prod-appsettings.json
       - name: Zaciągnięcie pliku appsettings
-        uses: suisei-cn/actions-download-file@v1.3.0
-        with:
-          url: "https://raw.githubusercontent.com/PooPosting/Back-end/development/PooPosting.Api/appsettings.Template.json"
-          target: roles/web_config/templates/dev-appsettings.json
+        run: "wget https://raw.githubusercontent.com/PooPosting/Back-end/development/PooPosting.Api/appsettings.Template.json -O roles/web_config/templates/dev-appsettings.json"
       - name: Wypełnianie plików sekretami
         uses: faradaytrs/substitute-secrets-action@2.1
         with:
