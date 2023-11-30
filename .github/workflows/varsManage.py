@@ -113,14 +113,14 @@ def generowanieString(dlugosc):
     return generated
 
 def porownanieZmiennychZWartosciami(odpowiedz = ""):
-    if(int(odczytZmienna(NoS)) > int(liczAppSekrety(regex))):
+    if(int(odczytZmienna(NoS)) > liczAppSekrety(regex)):
         if(odpowiedz == "owszem"):
             poczatek = 1
         else:
             poczatek = int(liczAppSekrety(regex)+1)
         for i in range(poczatek, int(odczytZmienna(NoS))+1):
             dodajZaktualizujSekret(nazwaSekretu+str(i), generowanieString(dlugosc), 'all')
-    elif(int(odczytZmienna(NoS)) < int(liczAppSekrety(regex))):
+    elif(int(odczytZmienna(NoS)) < liczAppSekrety(regex)):
         for i in range(int(liczAppSekrety(regex)), int(odczytZmienna(NoS)), -1):
             usunSekret(nazwaSekretu+str(i))
         if(odpowiedz == "owszem"):
