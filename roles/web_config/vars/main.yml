@@ -1,0 +1,12 @@
+---
+pma_domain: ${PMA_DOMAIN}
+db_users:
+  - username: ${DB_USERNAME}
+    password: ${DB_PASS}
+    type: prod
+  - username: ${DB_USERNAME}
+    password: ${DB_PASS}
+    type: dev
+
+d_version: ^{DOTNET_VERSION}
+...

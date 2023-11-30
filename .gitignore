@@ -1,3 +1,2 @@
-/roles/*/vars/main.yml
 /roles/*/vars/backup*.yml
 /roles/*/templates/appsettings.json.j2

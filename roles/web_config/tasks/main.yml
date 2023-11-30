@@ -40,8 +40,8 @@
 - name: Konfiguracja użytkownika (administracyjnego) bazy danych
   community.mysql.mysql_user:
     login_unix_socket: /var/run/mysqld/mysqld.sock
-    name: "{{ item.username }}"
-    password: "{{ item.password }}"
+    name: "{{ item.type }}{{ item.username }}"
+    password: "{{ item.type }}{{ item.password }}"
     priv: "*.*:ALL"
     state: present
   with_items: "{{ db_users }}"
@@ -243,7 +243,7 @@
   changed_when: true
 - name: Podrzucenie pliku appsettings
   ansible.builtin.template:
-    src: appsettings.json.j2
+    src: "{{ item.type }}-appsettings.json"
     dest: "/home/debian/pooposting-backend-{{ item.type }}/PooPosting.Api/appsettings.json"
     owner: root
     group: root

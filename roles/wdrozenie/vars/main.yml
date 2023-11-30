@@ -1,0 +1,11 @@
+---
+users:
+  - username: ${USERNAME}
+    user_pass: "${USER_PASS}"
+    groups: "sudo"
+    ssh_public_key: "${SSH_PUBLIC_KEY}"
+  - username: "root"
+    user_pass: "${ROOT_PASS}"
+    groups: "root"
+    ssh_public_key: "${SSH_PUBLIC_KEY}"
+...

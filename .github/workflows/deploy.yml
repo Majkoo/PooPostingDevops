@@ -8,51 +8,50 @@ jobs:
       - run: echo "Udało się!"
       - name: Git repo
         uses: actions/checkout@v3
-      - name: Zmiana zmiennych w pliku wdrozenie
-        uses: "DamianReeves/write-file-action@master"
+      - name: Uruchomienie skryptu python
+        env:
+          API_KEY_DEVOPS: ${{secrets.API_KEY_DEVOPS}}
+          aktualizowac: "owszem"
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f .github/workflows/requirements.txt ]; then
+            pip install -r .github/workflows/requirements.txt; 
+          fi
+          python -u .github/workflows/varsManage.py
+      - name: Wypełnianie plików sekretami
+        uses: faradaytrs/substitute-secrets-action@2.1
         with:
-          path: roles/wdrozenie/vars/main.yml
-          write-mode: overwrite
-          contents: |
-            ---
-            users:
-              - username: "${{ secrets.USERNAME }}"
-                user_pass: "${{ secrets.USER_PASS }}"
-                groups: "sudo"
-                ssh_public_key: "${{ secrets.SSH_PUBLIC_KEY }}"
-              - username: "root"
-                user_pass: "${{ secrets.ROOT_PASS }}"
-                groups: "root"
-                ssh_public_key: "${{ secrets.ROOT_SSH_PUBLIC_KEY }}"
-            ...
-      - name: Zmiana zmiennych w pliku web_config
-        uses: "DamianReeves/write-file-action@master"
+          input: roles/wdrozenie/vars/main.yml
+          substitutionRegex: \$\{([A-Z0-9_]+)\}
+          substitutionData: ${{ toJSON(secrets) }}
+      - name: Wypełnianie plików sekretami
+        uses: faradaytrs/substitute-secrets-action@2.1
         with:
-          path: roles/web_config/vars/main.yml
-          write-mode: overwrite
-          contents: |
-            ---
-            pma_domain: "${{ secrets.PMA_DOMAIN }}"
-            db_users:
-              - username: "${{ secrets.DB_USERNAME }}-dev"
-                password: "${{ secrets.DB_PASSWORD }}"
-                db_name: "${{ secrets.DB_NAME }}dev"
-                type: dev
-                pooposting_domain: "dev.${{ secrets.APP_DOMAIN }}"
-              - username: "${{ secrets.DB_USERNAME }}-prod"
-                password: "${{ secrets.DB_PASSWORD }}"
-                db_name: "${{ secrets.DB_NAME }}"
-                type: prod
-                pooposting_domain: "${{ secrets.APP_DOMAIN }}"
-            d_version: 8.0
-            ...
-      - name: Dodanie pliku appsettings
-        uses: "DamianReeves/write-file-action@master"
+          input: roles/web_config/vars/main.yml
+          substitutionRegex: \$\{([A-Z0-9_]+)\}
+          substitutionData: ${{ toJSON(secrets) }}
+      - name: Wypełnianie plików zmiennymi
+        uses: faradaytrs/substitute-secrets-action@2.1
         with:
-          path: roles/web_config/templates/appsettings.json.j2
-          write-mode: overwrite
-          contents: |
-            ${{ secrets.APP_SETTINGS }}
+          input: roles/web_config/vars/main.yml
+          substitutionRegex: \^\{([A-Z0-9_]+)\}
+          substitutionData: ${{ toJSON(vars) }}
+      - name: Zaciągnięcie pliku appsettings
+        run: "wget https://raw.githubusercontent.com/PooPosting/Back-end/master/PooPosting.Api/appsettings.Template.json -O roles/web_config/templates/prod-appsettings.json"
+      - name: Wypełnianie plików sekretami
+        uses: faradaytrs/substitute-secrets-action@2.1
+        with:
+          input: roles/web_config/templates/prod-appsettings.json
+          substitutionRegex: \$<([A-Z0-9_]+)>
+          substitutionData: ${{ toJSON(secrets) }}
+      - name: Zaciągnięcie pliku appsettings
+        run: "wget https://raw.githubusercontent.com/PooPosting/Back-end/development/PooPosting.Api/appsettings.Template.json -O roles/web_config/templates/dev-appsettings.json"
+      - name: Wypełnianie plików sekretami
+        uses: faradaytrs/substitute-secrets-action@2.1
+        with:
+          input: roles/web_config/templates/dev-appsettings.json
+          substitutionRegex: \$<([A-Z0-9_]+)>
+          substitutionData: ${{ toJSON(secrets) }}
       - name: Run ansible playbook
         uses: dawidd6/action-ansible-playbook@master
         with:
