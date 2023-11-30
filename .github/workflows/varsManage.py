@@ -132,7 +132,7 @@ def porownanieZmiennychZWartosciami(odpowiedz = ""):
             poczatek = 1
             for i in range(poczatek, int(odczytZmienna(NoS))+1):
                 dodajZaktualizujSekret(nazwaSekretu+str(i), generowanieString(dlugosc), 'all')
-try:
-    porownanieZmiennychZWartosciami(os.getenv('aktualizowac'))
-except:
-    print("Error!")
+#try:
+porownanieZmiennychZWartosciami(os.getenv('aktualizowac'))
+#except:
+#    print("Error!")
