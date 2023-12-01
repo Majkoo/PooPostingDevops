@@ -17,9 +17,6 @@
     repo: "{{ lookup('ansible.builtin.env', 'repo') }}"
 
   tasks:
-    - name: Wyświetlenie zmiennej
-      ansible.builtin.debug:
-        msg: "Test: {{ type }}, {{ repo }}"
     - name: Stop pooposting
       ansible.builtin.service:
         name: "pooposting-api-{{ type }}"
@@ -34,7 +31,7 @@
         version: "{{ repo }}"
     - name: Aktualizacja pliku appsettings
       ansible.builtin.template:
-        src: ".github/appsettings.json"
+        src: ".github/workflows/appsettings.json"
         dest: "/home/debian/pooposting-backend-{{ type }}/PooPosting.Api/appsettings.json"
         owner: root
         group: root
