@@ -1,0 +1,18 @@
+---
+- name: Deploy environment for DOTNet
+  hosts: vps
+  remote_user: debian
+  become: true
+  any_errors_fatal: true
+
+  pre_tasks:
+    - name: "Check if destination distribution is debian"
+      ansible.builtin.debug:
+        msg: "Jeżeli dystrybucja docelowa, to nie Debian, nic nie zostanie wykonane"
+      failed_when: ansible_facts['os_family'] != "Debian"
+      when: ansible_facts['os_family'] != "Debian"
+
+  roles:
+    - role: wdrozenie
+    - role: web_config
+...

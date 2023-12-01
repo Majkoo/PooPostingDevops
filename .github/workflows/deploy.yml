@@ -1,0 +1,63 @@
+name: Deploy Dotnet environement
+run-name: ${{ github.actor }} wdraża
+on: [workflow_dispatch]
+jobs:
+  Deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Udało się!"
+      - name: Git repo
+        uses: actions/checkout@v3
+      - name: Uruchomienie skryptu python
+        env:
+          API_KEY_DEVOPS: ${{secrets.API_KEY_DEVOPS}}
+          aktualizowac: "owszem"
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f .github/workflows/requirements.txt ]; then
+            pip install -r .github/workflows/requirements.txt; 
+          fi
+          python -u .github/workflows/varsManage.py
+      - name: Wypełnianie plików sekretami
+        uses: faradaytrs/substitute-secrets-action@2.1
+        with:
+          input: roles/wdrozenie/vars/main.yml
+          substitutionRegex: \$\{([A-Z0-9_]+)\}
+          substitutionData: ${{ toJSON(secrets) }}
+      - name: Wypełnianie plików sekretami
+        uses: faradaytrs/substitute-secrets-action@2.1
+        with:
+          input: roles/web_config/vars/main.yml
+          substitutionRegex: \$\{([A-Z0-9_]+)\}
+          substitutionData: ${{ toJSON(secrets) }}
+      - name: Wypełnianie plików zmiennymi
+        uses: faradaytrs/substitute-secrets-action@2.1
+        with:
+          input: roles/web_config/vars/main.yml
+          substitutionRegex: \^\{([A-Z0-9_]+)\}
+          substitutionData: ${{ toJSON(vars) }}
+      - name: Zaciągnięcie pliku appsettings
+        run: "wget https://raw.githubusercontent.com/PooPosting/Back-end/master/PooPosting.Api/appsettings.Template.json -O roles/web_config/templates/prod-appsettings.json"
+      - name: Wypełnianie plików sekretami
+        uses: faradaytrs/substitute-secrets-action@2.1
+        with:
+          input: roles/web_config/templates/prod-appsettings.json
+          substitutionRegex: \$<([A-Z0-9_]+)>
+          substitutionData: ${{ toJSON(secrets) }}
+      - name: Zaciągnięcie pliku appsettings
+        run: "wget https://raw.githubusercontent.com/PooPosting/Back-end/development/PooPosting.Api/appsettings.Template.json -O roles/web_config/templates/dev-appsettings.json"
+      - name: Wypełnianie plików sekretami
+        uses: faradaytrs/substitute-secrets-action@2.1
+        with:
+          input: roles/web_config/templates/dev-appsettings.json
+          substitutionRegex: \$<([A-Z0-9_]+)>
+          substitutionData: ${{ toJSON(secrets) }}
+      - name: Run ansible playbook
+        uses: dawidd6/action-ansible-playbook@master
+        with:
+          playbook: playbook.yml
+          directory: ./
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          inventory: |
+            [vps]
+            ${{ secrets.IP }}
