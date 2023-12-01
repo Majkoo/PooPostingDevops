@@ -64,7 +64,7 @@
         mode: 0755
       with_subelements:
         - "{{ v }}"
-        - "files"
+        - files
     - name: Kasowanie zawartości katalogu
       ansible.builtin.file:
         state: "{{ item.state }}"
@@ -74,7 +74,7 @@
         mode: 0755
       with_subelements:
         - "{{ v }}"
-        - "state"
+        - state
     - name: Wykonanie dotnet punlish
       ansible.builtin.command:
         chdir: "/home/debian/pooposting-backend-{{ item.type }}/PooPosting.Api"
