@@ -14,9 +14,77 @@
 
   vars:
     type: "{{ lookup('ansible.builtin.env', 'type') }}"
+    repo: "{{ lookup('ansible.builtin.env', 'repo') }}"
 
   tasks:
     - name: Wyświetlenie zmiennej
       ansible.builtin.debug:
-        msg: "Test: {{ type }}"
+        msg: "Test: {{ type }}, {{ repo }}"
+    - name: Stop pooposting
+      ansible.builtin.service:
+        name: "pooposting-api-{{ type }}"
+        enabled: true
+        state: stopped
+    - name: Zaciągnięcie zmian do repo
+      ansible.builtin.git:
+        repo: 'https://github.com/PooPosting/Back-end.git'
+        single_branch: true
+        update: true
+        dest: "/home/debian/pooposting-backend-{{ type }}/api"
+        version: "{{ repo }}"
+    - name: Aktualizacja pliku appsettings
+      ansible.builtin.template:
+        src: ".github/appsettings.json"
+        dest: "/home/debian/pooposting-backend-{{ type }}/PooPosting.Api/appsettings.json"
+        owner: root
+        group: root
+        mode: 0400
+        force: true
+    - name: Wykonanie dotnet ef db update
+      ansible.builtin.shell:
+        chdir: "/home/debian/pooposting-backend-{{ type }}"
+        cmd: "export PATH=\"$PATH:$HOME/.dotnet/tools\" && dotnet ef database update --project PooPosting.Domain/PooPosting.Domain.csproj \
+          --startup-project PooPosting.Api/PooPosting.Api.csproj --context PooPosting.Domain.DbContext.PictureDbContext"
+      changed_when: true
+    - name: Przeniesieie plików do /tmp
+      ansible.builtin.copy:
+        remote_src: true
+        src: "/var/www/pooposting-{{ type }}/api/{{ item }}"
+        dest: "/tmp"
+        owner: root
+        group: root
+        mode: 0755
+      with_items:
+        - "wwwroot"
+        - "api"
+    - name: Kasowanie zawartości katalogu
+      ansible.builtin.file:
+        state: "{{ item }}"
+        path: "/var/www/pooposting-{{ type }}/api"
+        owner: www-data
+        group: www-data
+        mode: 0755
+      with_items:
+        - "absent"
+        - "directory"
+    - name: Wykonanie dotnet punlish
+      ansible.builtin.command:
+        chdir: "/home/debian/pooposting-backend-{{ type }}/PooPosting.Api"
+        cmd: "dotnet publish --configuration Release --output /var/www/pooposting-{{ type }}/api"
+      changed_when: true
+    - name: Przeniesienie z powrotem plików
+      ansible.builtin.copy:
+        owner: root
+        group: root
+        mode: 0755
+        src: "/tmp/{{ item }}"
+        dest: "/var/www/pooposting-{{ type }}/api"
+      with_items:
+        - "wwwroot"
+        - "api"
+    - name: Start pooposting
+      ansible.builtin.service:
+        name: "pooposting-api-{{ type }}"
+        enabled: true
+        state: started
 ...
