@@ -16,10 +16,12 @@
     v:
       - type: "{{ lookup('ansible.builtin.env', 'type') }}"
         repo: "{{ lookup('ansible.builtin.env', 'repo') }}"
-
-    state: ['present', 'directory']
-    files: ['wwwroot', 'logs']
-
+        files:
+          - "wwwroot"
+          - "api"
+        state:
+          - "absent"
+          - "directory"
 
   tasks:
     - name: Stop pooposting
@@ -59,7 +61,7 @@
     - name: Przeniesieie plików do /tmp
       ansible.builtin.copy:
         remote_src: true
-        src: "/var/www/pooposting-{{ item.type }}/api/{{ files }}"
+        src: "/var/www/pooposting-{{ item.type }}/api/{{ item.files }}"
         dest: "/tmp"
         owner: root
         group: root
@@ -68,7 +70,7 @@
         - "{{ v }}"
     - name: Kasowanie zawartości katalogu
       ansible.builtin.file:
-        state: "{{ state }}"
+        state: "{{ item.state }}"
         path: "/var/www/pooposting-{{ item.type }}/api"
         owner: www-data
         group: www-data
@@ -85,17 +87,17 @@
         owner: root
         group: root
         mode: 0755
-        src: "/tmp/{{ files }}"
+        src: "/tmp/{{ item.files }}"
         dest: "/var/www/pooposting-{{ item.type }}/api"
       with_items:
         - "{{ v }}"
     - name: Kasowanie plików z tmp
       ansible.builtin.file:
         state: absent
-        path: "/tmp/{{ files }}"
+        path: "/tmp/{{ item.files }}"
     - name: Start pooposting
       ansible.builtin.service:
-        name: "pooposting-api-{{ type }}"
+        name: "pooposting-api-{{ item.type }}"
         enabled: true
         state: started
 ...
