@@ -18,5 +18,5 @@
   tasks:
     - name: Wyświetlenie zmiennej
       ansible.builtin.debug:
-        msg: "Test: {{ type }}"
+        msg: "Test: {{ type.value }}"
 ...
