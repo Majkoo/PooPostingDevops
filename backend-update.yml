@@ -13,72 +13,86 @@
       when: ansible_facts['os_family'] != "Debian"
 
   vars:
-    type: "{{ lookup('ansible.builtin.env', 'type') }}"
-    repo: "{{ lookup('ansible.builtin.env', 'repo') }}"
+    v:
+      - type: "{{ lookup('ansible.builtin.env', 'type') }}"
+        repo: "{{ lookup('ansible.builtin.env', 'repo') }}"
+
+    state: ['present', 'directory']
+    files: ['wwwroot', 'logs']
+
 
   tasks:
     - name: Stop pooposting
       ansible.builtin.service:
-        name: "pooposting-api-{{ type }}"
+        name: "pooposting-api-{{ item.type }}"
         enabled: true
         state: stopped
+      with_items:
+        - "{{ v }}"
     - name: Zaciągnięcie zmian do repo
       ansible.builtin.git:
         repo: 'https://github.com/PooPosting/Back-end.git'
         single_branch: true
         update: true
-        dest: "/home/debian/pooposting-backend-{{ type }}/api"
-        version: "{{ repo }}"
+        dest: "/home/debian/pooposting-backend-{{ item.type }}/api"
+        version: "{{ item.repo }}"
+      with_items:
+        - "{{ v }}"
     - name: Aktualizacja pliku appsettings
       ansible.builtin.template:
         src: "appsettings.json"
-        dest: "/home/debian/pooposting-backend-{{ type }}/PooPosting.Api/appsettings.json"
+        dest: "/home/debian/pooposting-backend-{{ item.type }}/PooPosting.Api/appsettings.json"
         owner: root
         group: root
         mode: 0400
         force: true
+      with_items:
+        - "{{ v }}"
     - name: Wykonanie dotnet ef db update
       ansible.builtin.shell:
-        chdir: "/home/debian/pooposting-backend-{{ type }}"
+        chdir: "/home/debian/pooposting-backend-{{ item.type }}"
         cmd: "export PATH=\"$PATH:$HOME/.dotnet/tools\" && dotnet ef database update --project PooPosting.Domain/PooPosting.Domain.csproj \
           --startup-project PooPosting.Api/PooPosting.Api.csproj --context PooPosting.Domain.DbContext.PictureDbContext"
       changed_when: true
+      with_items:
+        - "{{ v }}"
     - name: Przeniesieie plików do /tmp
       ansible.builtin.copy:
         remote_src: true
-        src: "/var/www/pooposting-{{ type }}/api/{{ item }}"
+        src: "/var/www/pooposting-{{ item.type }}/api/{{ files }}"
         dest: "/tmp"
         owner: root
         group: root
         mode: 0755
       with_items:
-        - "wwwroot"
-        - "api"
+        - "{{ v }}"
     - name: Kasowanie zawartości katalogu
       ansible.builtin.file:
-        state: "{{ item }}"
-        path: "/var/www/pooposting-{{ type }}/api"
+        state: "{{ state }}"
+        path: "/var/www/pooposting-{{ item.type }}/api"
         owner: www-data
         group: www-data
         mode: 0755
-      with_items:
-        - "absent"
-        - "directory"
+      with_subelements:
+        - "{{ v }}"
     - name: Wykonanie dotnet punlish
       ansible.builtin.command:
-        chdir: "/home/debian/pooposting-backend-{{ type }}/PooPosting.Api"
-        cmd: "dotnet publish --configuration Release --output /var/www/pooposting-{{ type }}/api"
+        chdir: "/home/debian/pooposting-backend-{{ item.type }}/PooPosting.Api"
+        cmd: "dotnet publish --configuration Release --output /var/www/pooposting-{{ item.type }}/api"
       changed_when: true
     - name: Przeniesienie z powrotem plików
       ansible.builtin.copy:
         owner: root
         group: root
         mode: 0755
-        src: "/tmp/{{ item }}"
-        dest: "/var/www/pooposting-{{ type }}/api"
+        src: "/tmp/{{ files }}"
+        dest: "/var/www/pooposting-{{ item.type }}/api"
       with_items:
-        - "wwwroot"
-        - "api"
+        - "{{ v }}"
+    - name: Kasowanie plików z tmp
+      ansible.builtin.file:
+        state: absent
+        path: "/tmp/{{ files }}"
     - name: Start pooposting
       ansible.builtin.service:
         name: "pooposting-api-{{ type }}"
