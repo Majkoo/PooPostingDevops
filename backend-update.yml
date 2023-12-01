@@ -13,10 +13,10 @@
       when: ansible_facts['os_family'] != "Debian"
 
   vars:
-    type: "{{ lookup('ansible.builtin.env'), 'type' }}"
+    type: "{{ lookup('ansible.builtin.env', 'type') }}"
 
   tasks:
     - name: Wyświetlenie zmiennej
       ansible.builtin.debug:
-        msg: "Test: {{ type.value }}"
+        msg: "Test: {{ type }}"
 ...
