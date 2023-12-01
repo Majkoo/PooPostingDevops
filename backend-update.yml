@@ -16,12 +16,8 @@
     v:
       - type: "{{ lookup('ansible.builtin.env', 'type') }}"
         repo: "{{ lookup('ansible.builtin.env', 'repo') }}"
-        files:
-          - "wwwroot"
-          - "api"
-        state:
-          - "absent"
-          - "directory"
+        files: ["wwwroot", "logs"]
+        state:: ["absent", "directory"]
 
   tasks:
     - name: Stop pooposting
