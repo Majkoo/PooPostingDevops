@@ -31,7 +31,7 @@
         version: "{{ repo }}"
     - name: Aktualizacja pliku appsettings
       ansible.builtin.template:
-        src: ".github/workflows/appsettings.json"
+        src: "appsettings.json"
         dest: "/home/debian/pooposting-backend-{{ type }}/PooPosting.Api/appsettings.json"
         owner: root
         group: root
