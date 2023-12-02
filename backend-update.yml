@@ -76,7 +76,7 @@
         owner: www-data
         group: www-data
         mode: 0755
-      with_subelements:
+      with_nested:
         - "{{ v }}"
         - "{{ state }}"
     - name: Wykonanie dotnet punlish
@@ -93,7 +93,7 @@
         mode: 0755
         src: "/tmp/{{ item.1 }}"
         dest: "/var/www/pooposting-{{ item.0.type }}/api"
-      with_items:
+      with_nested:
         - "{{ v }}"
         - "{{ files }}"
     - name: Kasowanie plików z tmp
