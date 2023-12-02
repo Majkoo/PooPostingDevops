@@ -57,14 +57,14 @@
     - name: Przeniesieie plików do /tmp
       ansible.builtin.copy:
         remote_src: true
-        src: "/var/www/pooposting-{{ item.type }}/api/{{ item.files }}"
+        src: "/var/www/pooposting-{{ item.0.type }}/api/{{ item.1 }}"
         dest: "/tmp"
         owner: root
         group: root
         mode: 0755
-      with_subelements:
+      with_nested:
         - "{{ v }}"
-        - files
+        - ['wwwroot', 'api']
     - name: Kasowanie zawartości katalogu
       ansible.builtin.file:
         state: "{{ item.state }}"
@@ -74,7 +74,6 @@
         mode: 0755
       with_subelements:
         - "{{ v }}"
-        - state
     - name: Wykonanie dotnet punlish
       ansible.builtin.command:
         chdir: "/home/debian/pooposting-backend-{{ item.type }}/PooPosting.Api"
