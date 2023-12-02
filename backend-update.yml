@@ -16,8 +16,12 @@
     v:
       - type: "{{ lookup('ansible.builtin.env', 'type') }}"
         repo: "{{ lookup('ansible.builtin.env', 'repo') }}"
-        files: ["wwwroot", "logs"]
-        state:: ["absent", "directory"]
+    files:
+      - "logs"
+      - "wwwroot"
+    state:
+      - "absent"
+      - "directory"
 
   tasks:
     - name: Stop pooposting
@@ -64,37 +68,45 @@
         mode: 0755
       with_nested:
         - "{{ v }}"
-        - ['wwwroot', 'api']
+        - "{{ files }}"
     - name: Kasowanie zawartości katalogu
       ansible.builtin.file:
-        state: "{{ item.state }}"
-        path: "/var/www/pooposting-{{ item.type }}/api"
+        state: "{{ item.1 }}"
+        path: "/var/www/pooposting-{{ item.0.type }}/api"
         owner: www-data
         group: www-data
         mode: 0755
       with_subelements:
         - "{{ v }}"
+        - "{{ state }}"
     - name: Wykonanie dotnet punlish
       ansible.builtin.command:
         chdir: "/home/debian/pooposting-backend-{{ item.type }}/PooPosting.Api"
         cmd: "dotnet publish --configuration Release --output /var/www/pooposting-{{ item.type }}/api"
       changed_when: true
+      with_items:
+        - "{{ v }}"
     - name: Przeniesienie z powrotem plików
       ansible.builtin.copy:
         owner: root
         group: root
         mode: 0755
-        src: "/tmp/{{ item.files }}"
-        dest: "/var/www/pooposting-{{ item.type }}/api"
+        src: "/tmp/{{ item.1 }}"
+        dest: "/var/www/pooposting-{{ item.0.type }}/api"
       with_items:
         - "{{ v }}"
+        - "{{ files }}"
     - name: Kasowanie plików z tmp
       ansible.builtin.file:
         state: absent
-        path: "/tmp/{{ item.files }}"
+        path: "/tmp/{{ item }}"
+      with_items:
+        - "{{ files }}"
     - name: Start pooposting
       ansible.builtin.service:
         name: "pooposting-api-{{ item.type }}"
         enabled: true
         state: started
+      with_items:
+        - "{{ v }}"
 ...
