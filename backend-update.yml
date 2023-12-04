@@ -28,7 +28,7 @@
     - name: Update dotnet packages
       ansible.builtin.apt:
         update_cache: true
-        upgrade: true
+        only_upgrade: true
         name:
           - "dotnet-sdk-{{ d_version }}"
           - "aspnetcore-runtime-{{ d_version }}"
