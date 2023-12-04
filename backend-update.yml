@@ -48,6 +48,7 @@
         repo: 'https://github.com/PooPosting/Back-end.git'
         single_branch: true
         update: true
+        force: true
         dest: "/home/debian/pooposting-backend-{{ item.type }}"
         version: "{{ item.repo }}"
       with_items:
