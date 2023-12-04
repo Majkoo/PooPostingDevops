@@ -5,7 +5,13 @@ jobs:
   Deploy:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Udało się!"
+      - name: Connect to the server
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.IP }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: "echo It's alive"
       - name: Git repo
         uses: actions/checkout@v3
       - name: Uruchomienie skryptu python
