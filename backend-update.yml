@@ -101,7 +101,7 @@
       ansible.builtin.file:
         state: absent
         path: "/tmp/{{ item.0.type }}-{{ item.1 }}"
-      with_items:
+      with_nested:
         - "{{ v }}"
         - "{{ files }}"
     - name: Start pooposting
