@@ -62,7 +62,7 @@
       ansible.builtin.copy:
         remote_src: true
         src: "/var/www/pooposting-{{ item.0.type }}/api/{{ item.1 }}"
-        dest: "/tmp"
+        dest: "/tmp/{{ item.0.type }}-{{ item.1 }}"
         owner: root
         group: root
         mode: 0755
@@ -92,16 +92,17 @@
         owner: root
         group: root
         mode: 0755
-        src: "/tmp/{{ item.1 }}"
-        dest: "/var/www/pooposting-{{ item.0.type }}/api"
+        src: "/tmp/{{ item.0.type }}-{{ item.1 }}"
+        dest: "/var/www/pooposting-{{ item.0.type }}/api/{{ item.1 }}"
       with_nested:
         - "{{ v }}"
         - "{{ files }}"
     - name: Kasowanie plików z tmp
       ansible.builtin.file:
         state: absent
-        path: "/tmp/{{ item }}"
+        path: "/tmp/{{ item.0.type }}-{{ item.1 }}"
       with_items:
+        - "{{ v }}"
         - "{{ files }}"
     - name: Start pooposting
       ansible.builtin.service:
