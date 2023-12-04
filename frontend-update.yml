@@ -117,7 +117,7 @@
       ansible.builtin.file:
         state: absent
         path: "/tmp/{{ item.type }}-api"
-      with_nested:
+      with_items:
         - "{{ v }}"
     - name: Kasowanie zawartości katalogu dist
       ansible.builtin.file:
