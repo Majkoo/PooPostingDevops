@@ -34,4 +34,8 @@ client.post(f'/vps/{vpsid}/rebuild/',
                 sshKey="my-key",
                 imageId=imageID)
 
-time.sleep(30)
+time.sleep(10)
+status = client.get(f'/vps/{vpsid}')['state']
+while(status != 'running'):
+    time.sleep(5)
+    status = client.get(f'/vps/{vpsid}')['state']
