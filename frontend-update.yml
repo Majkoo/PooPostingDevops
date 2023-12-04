@@ -69,7 +69,7 @@
     - name: Skopiowanie api do /tmp
       ansible.builtin.copy:
         remote_src: true
-        src: "/var/www/pooposting-{{ item.type }}/api"
+        src: "/var/www/pooposting-{{ item.type }}/api/"
         dest: "/tmp/{{ item.type }}-api"
         owner: root
         group: root
@@ -92,8 +92,8 @@
         owner: www-data
         group: www-data
         mode: 0755
-        src: "/tmp/{{ item.type }}-api"
-        dest: "/var/www/pooposting-{{ item.type }}/api/"
+        src: "/tmp/{{ item.type }}-api/"
+        dest: "/var/www/pooposting-{{ item.type }}/api"
       with_items:
         - "{{ v }}"
     - name: Skopiowanie plików na odpowiednie miejsca
