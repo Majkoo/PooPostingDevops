@@ -74,7 +74,7 @@
     - name: Przeniesieie plików do /tmp
       ansible.builtin.copy:
         remote_src: true
-        src: "/var/www/pooposting-{{ item.0.type }}/api/{{ item.1 }}"
+        src: "/var/www/pooposting-{{ item.0.type }}/api/{{ item.1 }}/"
         dest: "/tmp/{{ item.0.type }}-{{ item.1 }}"
         owner: root
         group: root
@@ -105,7 +105,7 @@
         owner: root
         group: root
         mode: 0755
-        src: "/tmp/{{ item.0.type }}-{{ item.1 }}"
+        src: "/tmp/{{ item.0.type }}-{{ item.1 }}/"
         dest: "/var/www/pooposting-{{ item.0.type }}/api/{{ item.1 }}"
       with_nested:
         - "{{ v }}"
