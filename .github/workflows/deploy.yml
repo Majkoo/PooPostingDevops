@@ -4,25 +4,23 @@ on: [workflow_dispatch]
 jobs:
   Deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
-      - name: Connect to the server
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.IP }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: "echo It's alive"
       - name: Git repo
         uses: actions/checkout@v3
-      - name: Uruchomienie skryptu python
+      - name: Uruchomienie skryptów python
         env:
           API_KEY_DEVOPS: ${{secrets.API_KEY_DEVOPS}}
+          OVH_APP_KEY: ${{secrets.OVH_APP_KEY}}
+          OVH_APP_SECRET: ${{secrets.OVH_APP_SECRET}}
+          OVH_CONSUMER_KEY: ${{secrets.OVH_CONSUMER_KEY}}
           aktualizowac: "owszem"
         run: |
           python -m pip install --upgrade pip
           if [ -f .github/workflows/requirements.txt ]; then
             pip install -r .github/workflows/requirements.txt; 
           fi
+          python -u .github/workflows/reinstallVPS.py
           python -u .github/workflows/varsManage.py
       - name: Wypełnianie plików sekretami
         uses: faradaytrs/substitute-secrets-action@2.1
