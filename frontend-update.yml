@@ -1,0 +1,140 @@
+---
+- name: Aktualizacja frontendu
+  hosts: vps
+  remote_user: debian
+  become: true
+  any_errors_fatal: true
+
+  pre_tasks:
+    - name: "Check if destination distribution is debian"
+      ansible.builtin.debug:
+        msg: "Jeżeli dystrybucja docelowa, to nie Debian, nic nie zostanie wykonane"
+      failed_when: ansible_facts['os_family'] != "Debian"
+      when: ansible_facts['os_family'] != "Debian"
+
+  vars:
+    v:
+      - type: "{{ lookup('ansible.builtin.env', 'type') }}"
+        repo: "{{ lookup('ansible.builtin.env', 'repo') }}"
+    state:
+      - "absent"
+      - "directory"
+
+  tasks:
+    - name: Update Nodejs
+      ansible.builtin.apt:
+        update_cache: true
+        only_upgrade: true
+        name: Nodejs
+    - name: Aktualizacja angulara
+      community.general.npm:
+        name: "@angular/cli"
+        global: true
+        state: latest
+    - name: Stop pooposting
+      ansible.builtin.service:
+        name: "pooposting-api-{{ item.type }}"
+        enabled: true
+        state: stopped
+      with_items:
+        - "{{ v }}"
+    - name: Stop nginx
+      ansible.builtin.service:
+        name: "nginx"
+        enabled: true
+        state: stopped
+    - name: Zaciągnięcie zmian do repo
+      ansible.builtin.git:
+        repo: 'https://github.com/PooPosting/Front-end.git'
+        single_branch: true
+        update: true
+        dest: "/home/debian/pooposting-frontend-{{ item.type }}"
+        version: "{{ item.repo }}"
+      with_items:
+        - "{{ v }}"
+    - name: Npm install w repo frontu
+      community.general.npm:
+        path: "/home/debian/pooposting-frontend-{{ item.type }}"
+        state: latest
+      with_items:
+        - "{{ v }}"
+    - name: Ng build
+      ansible.builtin.command:
+        chdir: "/home/debian/pooposting-frontend-{{ item.type }}"
+        cmd: "ng build -c {{ item.type }}-server"
+      changed_when: true
+      with_items:
+        - "{{ v }}"
+    - name: Skopiowanie api do /tmp
+      ansible.builtin.copy:
+        remote_src: true
+        src: "/var/www/pooposting-{{ item.type }}/api"
+        dest: "/tmp/{{ item.type }}-api"
+        owner: root
+        group: root
+        mode: 0755
+      with_items:
+        - "{{ v }}"
+    - name: Kasowanie zawartości katalogu
+      ansible.builtin.file:
+        state: "{{ item.1 }}"
+        path: "/var/www/pooposting-{{ item.0.type }}"
+        owner: www-data
+        group: www-data
+        mode: 0755
+      with_nested:
+        - "{{ v }}"
+        - "{{ state }}"
+    - name: Kopiowanie api z powrotem
+      ansible.builtin.copy:
+        remote_src: true
+        owner: www-data
+        group: www-data
+        mode: 0755
+        src: "/tmp/{{ item.type }}-api"
+        dest: "/var/www/pooposting-{{ item.type }}/api"
+      with_items:
+        - "{{ v }}"
+    - name: Zmiana uprawnień api
+      ansible.builtin.file:
+        path: "/var/www/pooposting-{{ item.type }}/api"
+        owner: www-data
+        group: www-data
+        mode: 0755
+      with_items:
+        - "{{ v }}"
+    - name: Skopiowanie plików na odpowiednie miejsca
+      ansible.builtin.copy:
+        src: "/home/debian/pooposting-frontend-{{ item.type }}/dist/"
+        dest: "/var/www/pooposting-{{ item.type }}"
+        owner: www-data
+        group: www-data
+        remote_src: true
+        mode: 0755
+      with_items:
+        - "{{ v }}"
+    - name: Kasowanie plików z tmp
+      ansible.builtin.file:
+        state: absent
+        path: "/tmp/{{ item.type }}-api"
+      with_nested:
+        - "{{ v }}"
+    - name: Kasowanie zawartości katalogu dist
+      ansible.builtin.file:
+        state: absent
+        path: "/home/debian/pooposting-frontend-{{ item.type }}/dist"
+      with_items:
+        - "{{ v }}"
+    - name: Start pooposting
+      ansible.builtin.service:
+        name: "pooposting-api-{{ item.type }}"
+        enabled: true
+        state: started
+      with_items:
+        - "{{ v }}"
+    - name: Start nginx
+      ansible.builtin.service:
+        name: "nginx"
+        enabled: true
+        state: started
+...
