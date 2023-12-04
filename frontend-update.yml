@@ -25,7 +25,7 @@
       ansible.builtin.apt:
         update_cache: true
         only_upgrade: true
-        name: Nodejs
+        name: nodejs
     - name: Aktualizacja angulara
       community.general.npm:
         name: "@angular/cli"
