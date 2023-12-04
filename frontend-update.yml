@@ -93,7 +93,7 @@
         group: www-data
         mode: 0755
         src: "/tmp/{{ item.type }}-api"
-        dest: "/var/www/pooposting-{{ item.type }}/api"
+        dest: "/var/www/pooposting-{{ item.type }}/api/"
       with_items:
         - "{{ v }}"
     - name: Skopiowanie plików na odpowiednie miejsca
