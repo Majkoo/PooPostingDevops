@@ -66,3 +66,4 @@ jobs:
             ${{ secrets.IP }}
           options: |
             --timeout 300
+            --extra-vars "ansible_ssh_timeout=300"
