@@ -35,6 +35,7 @@ client.post(f'/vps/{vpsid}/rebuild/',
                 imageId=imageID)
 
 time.sleep(10)
+print("Oczekiwanie na reinstalację serwera...")
 status = client.get(f'/vps/{vpsid}')['state']
 while(status != 'running'):
     time.sleep(5)
