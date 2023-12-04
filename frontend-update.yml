@@ -112,7 +112,7 @@
         path: "/tmp/{{ item.type }}-api"
       with_items:
         - "{{ v }}"
-    - name: Kasowanie zawartości katalogu dist
+    - name: Kasowanie katalogu dist
       ansible.builtin.file:
         state: absent
         path: "/home/debian/pooposting-frontend-{{ item.type }}/dist"
