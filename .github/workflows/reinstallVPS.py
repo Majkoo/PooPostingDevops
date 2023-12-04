@@ -40,3 +40,4 @@ status = client.get(f'/vps/{vpsid}')['state']
 while(status != 'running'):
     time.sleep(5)
     status = client.get(f'/vps/{vpsid}')['state']
+print("\nOK!")
