@@ -32,7 +32,7 @@
         name:
           - "dotnet-sdk-{{ d_version }}"
           - "aspnetcore-runtime-{{ d_version }}"
-    - name: Wykonanie dotnet tool install
+    - name: Aktualizacja modułu dotnet
       ansible.builtin.command:
         cmd: "dotnet tool update --global dotnet-ef --version {{ d_version }}"
       changed_when: true
