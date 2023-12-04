@@ -56,13 +56,13 @@ jobs:
           substitutionRegex: \$<([A-Z0-9_]+)>
           substitutionData: ${{ toJSON(secrets) }}
       - name: Connect to the server
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.IP }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: "echo It's alive"
-          timeout: 5m
+          timeout: 360s
       - name: Run ansible playbook
         uses: dawidd6/action-ansible-playbook@master
         with:
