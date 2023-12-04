@@ -48,6 +48,7 @@
         repo: 'https://github.com/PooPosting/Front-end.git'
         single_branch: true
         update: true
+        force: true
         dest: "/home/debian/pooposting-frontend-{{ item.type }}"
         version: "{{ item.repo }}"
       with_items:
@@ -93,14 +94,6 @@
         mode: 0755
         src: "/tmp/{{ item.type }}-api"
         dest: "/var/www/pooposting-{{ item.type }}/api"
-      with_items:
-        - "{{ v }}"
-    - name: Zmiana uprawnień api
-      ansible.builtin.file:
-        path: "/var/www/pooposting-{{ item.type }}/api"
-        owner: www-data
-        group: www-data
-        mode: 0755
       with_items:
         - "{{ v }}"
     - name: Skopiowanie plików na odpowiednie miejsca
