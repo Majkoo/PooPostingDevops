@@ -13,7 +13,7 @@
       when: ansible_facts['os_family'] != "Debian"
 
   vars:
-    d_version: "{{ loookup('ansible.builtin.env', 'd_version') }}"
+    d_version: "{{ lookup('ansible.builtin.env', 'd_version') }}"
     v:
       - type: "{{ lookup('ansible.builtin.env', 'type') }}"
         repo: "{{ lookup('ansible.builtin.env', 'repo') }}"
