@@ -33,5 +33,3 @@ client.post(f'/vps/{vpsid}/rebuild/',
                 doNotSendPassword=True,
                 sshKey="my-key",
                 imageId=imageID)
-
-time.sleep(45)
