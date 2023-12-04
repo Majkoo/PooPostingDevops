@@ -25,6 +25,18 @@
       - "directory"
 
   tasks:
+    - name: Stop nginx
+      ansible.builtin.service:
+        name: "nginx"
+        enabled: true
+        state: stopped
+    - name: Stop pooposting
+      ansible.builtin.service:
+        name: "pooposting-api-{{ item.type }}"
+        enabled: true
+        state: stopped
+      with_items:
+        - "{{ v }}"
     - name: Update dotnet packages
       ansible.builtin.apt:
         update_cache: true
@@ -36,13 +48,6 @@
       ansible.builtin.command:
         cmd: "dotnet tool update --global dotnet-ef --version {{ d_version }}"
       changed_when: true
-    - name: Stop pooposting
-      ansible.builtin.service:
-        name: "pooposting-api-{{ item.type }}"
-        enabled: true
-        state: stopped
-      with_items:
-        - "{{ v }}"
     - name: Zaciągnięcie zmian do repo
       ansible.builtin.git:
         repo: 'https://github.com/PooPosting/Back-end.git'
@@ -124,4 +129,9 @@
         state: started
       with_items:
         - "{{ v }}"
+    - name: Start nginx
+      ansible.builtin.service:
+        name: "nginx"
+        enabled: true
+        state: started
 ...
