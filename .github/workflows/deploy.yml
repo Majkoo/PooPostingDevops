@@ -1,6 +1,9 @@
 name: Deploy Dotnet environement
 run-name: ${{ github.actor }} wdraża
 on: [workflow_dispatch]
+concurrency: 
+  group: PooPosting
+  cancel-in-progress: false
 jobs:
   Deploy:
     runs-on: ubuntu-latest
