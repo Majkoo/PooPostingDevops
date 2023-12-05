@@ -1,7 +1,7 @@
 name: Deploy Dotnet environement
 run-name: ${{ github.actor }} wdraża
 on: [workflow_dispatch]
-concurrency: 
+concurrency:
   group: PooPosting
   cancel-in-progress: false
 jobs:
@@ -9,11 +9,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - name: Queue (kłełełe)
-        uses: devkeydet/action-environment-queue@v1
-        with:
-          environment: PooPosting
-          github-token: ${{ secrets.API_KEY_DEVOPS }}
       - name: Git repo
         uses: actions/checkout@v3
       - name: Uruchomienie skryptów python
