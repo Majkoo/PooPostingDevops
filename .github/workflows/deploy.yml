@@ -60,7 +60,7 @@ jobs:
           substitutionRegex: \$<([A-Z0-9_]+)>
           substitutionData: ${{ toJSON(secrets) }}
       - name: Run ansible playbook
-        uses: dawidd6/action-ansible-playbook@master
+        uses: aimerib/ansible-playwright@v2
         with:
           playbook: playbook.yml
           directory: ./
