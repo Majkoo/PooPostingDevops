@@ -23,7 +23,7 @@ jobs:
           if [ -f .github/workflows/requirements.txt ]; then
             pip install -r .github/workflows/requirements.txt; 
           fi
-          python -u .github/workflows/reinstallVPS.py
+          
           python -u .github/workflows/varsManage.py
       - name: Wypełnianie plików sekretami
         uses: faradaytrs/substitute-secrets-action@2.1
