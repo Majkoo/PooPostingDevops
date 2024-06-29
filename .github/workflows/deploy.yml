@@ -11,9 +11,9 @@ jobs:
     steps:
       - name: Git repo
         uses: actions/checkout@v3
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.9'
+      # - uses: actions/setup-python@v5
+      #   with:
+      #     python-version: '3.9'
       - name: Uruchomienie skryptów python
         env:
           API_KEY_DEVOPS: ${{secrets.API_KEY_DEVOPS}}
@@ -63,6 +63,7 @@ jobs:
           substitutionRegex: \$<([A-Z0-9_]+)>
           substitutionData: ${{ toJSON(secrets) }}
       - run: pip list
+      - run: python3 -m pip install passlib
       - name: Run ansible playbook
         uses: dawidd6/action-ansible-playbook@master
         with:
