@@ -62,7 +62,6 @@ jobs:
           input: roles/web_config/templates/dev-appsettings.json
           substitutionRegex: \$<([A-Z0-9_]+)>
           substitutionData: ${{ toJSON(secrets) }}
-      - run: pip3 install ansible
       - name: Run ansible playbook
         uses: dawidd6/action-ansible-playbook@master
         with:
