@@ -62,8 +62,7 @@ jobs:
           input: roles/web_config/templates/dev-appsettings.json
           substitutionRegex: \$<([A-Z0-9_]+)>
           substitutionData: ${{ toJSON(secrets) }}
-      - run: pip list
-      - run: python3 -m pip install passlib
+      - run: ansible-playbook --version
       - name: Run ansible playbook
         uses: dawidd6/action-ansible-playbook@master
         with:
