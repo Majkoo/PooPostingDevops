@@ -23,6 +23,7 @@ jobs:
           if [ -f .github/workflows/requirements.txt ]; then
             pip install -r .github/workflows/requirements.txt; 
           fi
+          python -u .github/workflows/reinstallVPS.py
           python -u .github/workflows/varsManage.py
       - name: Wypełnianie plików sekretami
         uses: faradaytrs/substitute-secrets-action@2.1
@@ -58,8 +59,9 @@ jobs:
           input: roles/web_config/templates/dev-appsettings.json
           substitutionRegex: \$<([A-Z0-9_]+)>
           substitutionData: ${{ toJSON(secrets) }}
+      - run: pip list
       - name: Run ansible playbook
-        uses: aimerib/ansible-playwright@master
+        uses: dawidd6/action-ansible-playbook@master
         with:
           playbook: playbook.yml
           directory: ./
