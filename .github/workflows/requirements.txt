@@ -1,3 +1,8 @@
 pynacl
 requests
 ovh
+paramiko 
+PyYAML 
+jinja2 
+httplib2 
+passlib
